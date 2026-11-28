@@ -65,6 +65,12 @@ export function AdminPage() {
           saveBlob(blob, fileName)
           break
         }
+        case 'download-card': {
+          if (!action.guest.invitationId) return
+          const { blob, fileName } = await api.downloadCard(token, action.guest.invitationId)
+          saveBlob(blob, fileName)
+          break
+        }
         case 'issue': {
           const issued = await api.issueInvitation(token, action.guest.id)
           await queryClient.invalidateQueries({ queryKey: ['guests'] })
