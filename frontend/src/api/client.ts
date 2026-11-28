@@ -9,7 +9,7 @@ import type {
   VerifyResponse,
 } from './types'
 
-// const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, '')
+// const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
 const API_BASE = 'http://localhost:3000/api'
 export class ApiError extends Error {
   readonly status: number
@@ -165,6 +165,27 @@ export const api = {
         typeof body === 'object' && body !== null && 'error' in body
           ? readErrorMessage(body.error)
           : `QR download failed (${response.status})`
+      throw new ApiError(message, response.status)
+    }
+
+    return {
+      blob: await response.blob(),
+      fileName: filenameFromHeader(response.headers.get('Content-Disposition')),
+    }
+  },
+
+  downloadCard: async (token: string, invitationId: string) => {
+    const response = await fetch(`${API_BASE}/invitations/${invitationId}/card`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'image/png' },
+    }).catch(() => {
+      throw new ApiError('Cannot reach the API. Check that the backend is running.', 0)
+    })
+    if (!response.ok) {
+      const body: unknown = await response.json().catch(() => null)
+      const message =
+        typeof body === 'object' && body !== null && 'error' in body
+          ? readErrorMessage(body.error)
+          : `Invitation card download failed (${response.status})`
       throw new ApiError(message, response.status)
     }
 
