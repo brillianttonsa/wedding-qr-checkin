@@ -1,0 +1,1 @@
+ALTER TABLE "invitations" ADD COLUMN "revocation_reason" varchar(200);
