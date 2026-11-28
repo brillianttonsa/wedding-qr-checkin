@@ -1,75 +1,33 @@
-# React + TypeScript + Vite
+# Gather wedding check-in frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Responsive React app for the wedding administrator and admission guards. The code is split into API, authentication, shared components, guest-management features, and page modules under `src/`.
 
-Currently, two official plugins are available:
+## Local development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Start the backend on port `3000` and ensure its PostgreSQL migrations and users are ready. See [`../backend/README.md`](../backend/README.md).
+2. From `frontend/`, install and start Vite:
 
-## React Compiler
+   ```powershell
+   npm ci
+   npm run dev -- --host 0.0.0.0
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. Open the Vite URL, sign in with an admin or guard account, and use the role-appropriate workspace. During development, `/api` requests are proxied to `http://localhost:3000`.
 
-## Expanding the ESLint configuration
+Set `VITE_API_BASE_URL` when the API is not at the same origin or when building for deployment. For example, use `https://your-api.example.com/api`. Do not put credentials in frontend environment variables.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Pages
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- `/login` — shared sign-in page for admin and guards.
+- `/admin` — guest search/filter, attendance cards, register/edit/import, QR and invitation-card downloads, bulk QR ZIP, issue/reissue/revoke.
+- `/scanner` — guard camera scanner, manual token/URL entry, verification, guest identity review, and explicit admission confirmation.
+- `/check-in?token=...` — QR destination that forwards its token to the authenticated scanner. A guard signs in before the token is verified.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+The scanner uses `@zxing/browser`. Camera access works on `localhost` for development and requires HTTPS on a phone or production host. Admission remains online-only; the PWA caches the application shell, not check-in API responses.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Build and lint
 
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```powershell
+npm run build
+npm run lint
 ```
